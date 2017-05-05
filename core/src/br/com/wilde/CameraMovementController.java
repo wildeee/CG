@@ -24,10 +24,8 @@ public class CameraMovementController implements Runnable {
 	}
 
 	private void moveCamera() {
-		Utils.printVector(Camera.INSTANCE.position);
 		checkMovementForwardOrBackward();
 		checkMovementLeftOrRight();
-		
 		Camera.INSTANCE.update();
 	}
 
@@ -42,13 +40,13 @@ public class CameraMovementController implements Runnable {
 		Vector3 directionFloor = new Vector3(Camera.INSTANCE.direction);
 		directionFloor.y = 0;
 		Double angle = Utils.angleBetween(directionFloor, Vector3.X);
-		Double deltaX = calculateDeltaX(angle);
-		Double deltaZ = calculateDeltaZ(angle);
+		Double deltaX = calculateDeltaXForwardBackward(angle);
+		Double deltaZ = calculateDeltaZForwardBackward(angle);
 		
 		if (movingForward) {
-			moveForwardOrBackward(deltaX, deltaZ);
+			moveOnTheFloor(deltaX, deltaZ);
 		} else {
-			moveForwardOrBackward(-deltaX, -deltaZ);
+			moveOnTheFloor(-deltaX, -deltaZ);
 		}
 	}
 	
@@ -63,40 +61,41 @@ public class CameraMovementController implements Runnable {
 		Vector3 perpendicularDirection = getPerpendicularDirection();
 		Double angle = Utils.angleBetween(perpendicularDirection, Vector3.X);
 		
-		Double distanceX = Math.abs(Math.cos(angle) * STEP_SIZE);
-		Double distanceZ = Math.abs(Math.sin(angle) * STEP_SIZE);
-		
-		Float signumX = Math.signum(perpendicularDirection.x);
-		Float signumZ = Math.signum(perpendicularDirection.z);
-		
-		Double deltaX = distanceX * signumX;
-		Double deltaZ = distanceZ * signumZ;
+		Double deltaX = calculateDeltaXLeftRight(angle, perpendicularDirection);
+		Double deltaZ = calculateDeltaZLeftRight(angle, perpendicularDirection);
 		
 		if (movingLeft) {
-			Camera.INSTANCE.position.x -= deltaX;
-			Camera.INSTANCE.position.z -= deltaZ;
+			moveOnTheFloor(-deltaX, -deltaZ);
+		} else {
+			moveOnTheFloor(deltaX, deltaZ);
 		}
-		
-		if (movingRight) {
-			Camera.INSTANCE.position.x += deltaX;
-			Camera.INSTANCE.position.z += deltaZ;
-		}
-		
 	}
 	
-	private Double calculateDeltaX(Double directionAngleWithXAxis) {
+	private Double calculateDeltaXForwardBackward(Double directionAngleWithXAxis) {
 		Double distanceX = Math.abs(Math.sin(directionAngleWithXAxis) * STEP_SIZE);
 		Float signumX = Math.signum(Camera.INSTANCE.direction.x);
 		return distanceX * signumX;
 	}
 	
-	private Double calculateDeltaZ(Double directionAngleWithXAxis) {
+	private Double calculateDeltaZForwardBackward(Double directionAngleWithXAxis) {
 		Double distanceZ = Math.abs(Math.cos(directionAngleWithXAxis) * STEP_SIZE);
 		Float signumZ = Math.signum(Camera.INSTANCE.direction.z);
 		return distanceZ * signumZ;
 	}
 	
-	private void moveForwardOrBackward(Double deltaX, Double deltaZ){
+	private Double calculateDeltaXLeftRight(Double directionAngleWithXAxis, Vector3 direction) {
+		Double distanceX = Math.abs(Math.cos(directionAngleWithXAxis) * STEP_SIZE);
+		Float signumX = Math.signum(direction.x);
+		return distanceX * signumX;
+	}
+	
+	private Double calculateDeltaZLeftRight(Double directionAngleWithXAxis, Vector3 direction) {
+		Double distanceZ = Math.abs(Math.sin(directionAngleWithXAxis) * STEP_SIZE);
+		Float signumZ = Math.signum(direction.z);
+		return distanceZ * signumZ;
+	}
+	
+	private void moveOnTheFloor(Double deltaX, Double deltaZ){
 		Camera.INSTANCE.position.x += deltaX;
 		Camera.INSTANCE.position.z += deltaZ;
 	}
