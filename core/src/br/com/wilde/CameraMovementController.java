@@ -25,36 +25,10 @@ public class CameraMovementController implements Runnable {
 
 	private void moveCamera() {
 		
-		Double angle = Utils.angleBetween(Camera.INSTANCE.direction, Vector3.X);
-		
-		Double distanceX = Math.abs(Math.sin(angle) * STEP_SIZE);
-		Double distanceZ = Math.abs(Math.cos(angle) * STEP_SIZE);
-		
-		Double deltaX, deltaZ;
-		
-		Float signumX = Math.signum(Camera.INSTANCE.direction.x);
-		Float signumZ = Math.signum(Camera.INSTANCE.direction.z);
-		
-		Utils.printVector(Camera.INSTANCE.position);
-		
-		if (joystick.movingForward()){
-			deltaX = distanceX * signumX;
-			deltaZ = distanceZ * signumZ;
-			
-			Camera.INSTANCE.position.x += deltaX;
-			Camera.INSTANCE.position.z += deltaZ;
-		}
+		checkMovementForwardOrBackward();
 		
 		if (joystick.movingLeft()){
 			Camera.INSTANCE.position.z += STEP_SIZE;
-		}
-		
-		if (joystick.movingBackward()){
-			deltaX = distanceX * signumX;
-			deltaZ = distanceZ * signumZ;
-			
-			Camera.INSTANCE.position.x -= deltaX;
-			Camera.INSTANCE.position.z -= deltaZ;
 		}
 		
 		if (joystick.movingRight()){
@@ -62,5 +36,41 @@ public class CameraMovementController implements Runnable {
 		}
 		
 		Camera.INSTANCE.update();
+	}
+
+	private void checkMovementForwardOrBackward() {
+		Boolean movingForward = joystick.movingForward();
+		Boolean movingBackward = joystick.movingBackward();
+		
+		if (!(movingForward ^ movingBackward)) {
+			return;
+		}
+		
+		Double angle = Utils.angleBetween(Camera.INSTANCE.direction, Vector3.X);
+		Double deltaX = calculateDeltaX(angle);
+		Double deltaZ = calculateDeltaZ(angle);
+		
+		if (movingForward) {
+			moveForwardOrBackward(deltaX, deltaZ);
+		} else {
+			moveForwardOrBackward(-deltaX, -deltaZ);
+		}
+	}
+	
+	private Double calculateDeltaX(Double directionAngleWithXAxis) {
+		Double distanceX = Math.abs(Math.sin(directionAngleWithXAxis) * STEP_SIZE);
+		Float signumX = Math.signum(Camera.INSTANCE.direction.x);
+		return distanceX * signumX;
+	}
+	
+	private Double calculateDeltaZ(Double directionAngleWithXAxis) {
+		Double distanceZ = Math.abs(Math.cos(directionAngleWithXAxis) * STEP_SIZE);
+		Float signumZ = Math.signum(Camera.INSTANCE.direction.z);
+		return distanceZ * signumZ;
+	}
+	
+	private void moveForwardOrBackward(Double deltaX, Double deltaZ){
+		Camera.INSTANCE.position.x += deltaX;
+		Camera.INSTANCE.position.z += deltaZ;
 	}
 }
