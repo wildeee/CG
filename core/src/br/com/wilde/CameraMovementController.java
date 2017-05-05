@@ -1,9 +1,11 @@
 package br.com.wilde;
 
+import com.badlogic.gdx.math.Vector3;
+
 public class CameraMovementController implements Runnable {
 	
 	private final Joystick joystick;
-	private static final Float STEP_SIZE = 0.8f;
+	private static final Float STEP_SIZE = 1f;
 	
 	public CameraMovementController(Joystick joystick) {
 		this.joystick = joystick;
@@ -23,8 +25,24 @@ public class CameraMovementController implements Runnable {
 
 	private void moveCamera() {
 		
+		Double angle = Utils.angleBetween(Camera.INSTANCE.direction, Vector3.X);
+		
+		Double distanceX = Math.abs(Math.sin(angle) * STEP_SIZE);
+		Double distanceZ = Math.abs(Math.cos(angle) * STEP_SIZE);
+		
+		Double deltaX, deltaZ;
+		
+		Float signumX = Math.signum(Camera.INSTANCE.direction.x);
+		Float signumZ = Math.signum(Camera.INSTANCE.direction.z);
+		
+		Utils.printVector(Camera.INSTANCE.position);
+		
 		if (joystick.movingForward()){
-			Camera.INSTANCE.position.x -= STEP_SIZE;
+			deltaX = distanceX * signumX;
+			deltaZ = distanceZ * signumZ;
+			
+			Camera.INSTANCE.position.x += deltaX;
+			Camera.INSTANCE.position.z += deltaZ;
 		}
 		
 		if (joystick.movingLeft()){
@@ -32,7 +50,11 @@ public class CameraMovementController implements Runnable {
 		}
 		
 		if (joystick.movingBackward()){
-			Camera.INSTANCE.position.x += STEP_SIZE;
+			deltaX = distanceX * signumX;
+			deltaZ = distanceZ * signumZ;
+			
+			Camera.INSTANCE.position.x -= deltaX;
+			Camera.INSTANCE.position.z -= deltaZ;
 		}
 		
 		if (joystick.movingRight()){
