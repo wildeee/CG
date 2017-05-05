@@ -9,7 +9,7 @@ public class Camera extends PerspectiveCamera {
 	
 	private Camera() {
 		super(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		this.position.set(10f, 0f, 10f);
+		this.position.set(10f, 10f, 10f);
 		this.lookAt(0, 0, 0);
 		this.near = 1f;
 		this.far = 300f;

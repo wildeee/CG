@@ -24,16 +24,9 @@ public class CameraMovementController implements Runnable {
 	}
 
 	private void moveCamera() {
-		
+		Utils.printVector(Camera.INSTANCE.position);
 		checkMovementForwardOrBackward();
-		
-		if (joystick.movingLeft()){
-			Camera.INSTANCE.position.z += STEP_SIZE;
-		}
-		
-		if (joystick.movingRight()){
-			Camera.INSTANCE.position.z -= STEP_SIZE;
-		}
+		checkMovementLeftOrRight();
 		
 		Camera.INSTANCE.update();
 	}
@@ -46,7 +39,9 @@ public class CameraMovementController implements Runnable {
 			return;
 		}
 		
-		Double angle = Utils.angleBetween(Camera.INSTANCE.direction, Vector3.X);
+		Vector3 directionFloor = new Vector3(Camera.INSTANCE.direction);
+		directionFloor.y = 0;
+		Double angle = Utils.angleBetween(directionFloor, Vector3.X);
 		Double deltaX = calculateDeltaX(angle);
 		Double deltaZ = calculateDeltaZ(angle);
 		
@@ -55,6 +50,38 @@ public class CameraMovementController implements Runnable {
 		} else {
 			moveForwardOrBackward(-deltaX, -deltaZ);
 		}
+	}
+	
+	private void checkMovementLeftOrRight() {
+		Boolean movingLeft = joystick.movingLeft();
+		Boolean movingRight = joystick.movingRight();
+		
+		if (!(movingLeft ^ movingRight)){
+			return;
+		}
+		
+		Vector3 perpendicularDirection = getPerpendicularDirection();
+		Double angle = Utils.angleBetween(perpendicularDirection, Vector3.X);
+		
+		Double distanceX = Math.abs(Math.cos(angle) * STEP_SIZE);
+		Double distanceZ = Math.abs(Math.sin(angle) * STEP_SIZE);
+		
+		Float signumX = Math.signum(perpendicularDirection.x);
+		Float signumZ = Math.signum(perpendicularDirection.z);
+		
+		Double deltaX = distanceX * signumX;
+		Double deltaZ = distanceZ * signumZ;
+		
+		if (movingLeft) {
+			Camera.INSTANCE.position.x -= deltaX;
+			Camera.INSTANCE.position.z -= deltaZ;
+		}
+		
+		if (movingRight) {
+			Camera.INSTANCE.position.x += deltaX;
+			Camera.INSTANCE.position.z += deltaZ;
+		}
+		
 	}
 	
 	private Double calculateDeltaX(Double directionAngleWithXAxis) {
@@ -72,5 +99,13 @@ public class CameraMovementController implements Runnable {
 	private void moveForwardOrBackward(Double deltaX, Double deltaZ){
 		Camera.INSTANCE.position.x += deltaX;
 		Camera.INSTANCE.position.z += deltaZ;
+	}
+	
+	private Vector3 getPerpendicularDirection() {
+		Vector3 perpendicularDirection = new Vector3();
+		perpendicularDirection.x = -Camera.INSTANCE.direction.z;
+		perpendicularDirection.y = 0;
+		perpendicularDirection.z = Camera.INSTANCE.direction.x;
+		return perpendicularDirection;
 	}
 }
