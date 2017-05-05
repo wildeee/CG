@@ -3,7 +3,7 @@ package br.com.wilde;
 public class CameraMovementController implements Runnable {
 	
 	private final Joystick joystick;
-	private Float stepSize = 0.8f;
+	private static final Float STEP_SIZE = 0.8f;
 	
 	public CameraMovementController(Joystick joystick) {
 		this.joystick = joystick;
@@ -24,19 +24,19 @@ public class CameraMovementController implements Runnable {
 	private void moveCamera() {
 		
 		if (joystick.movingForward()){
-			Camera.INSTANCE.position.x -= stepSize;
+			Camera.INSTANCE.position.x -= STEP_SIZE;
 		}
 		
 		if (joystick.movingLeft()){
-			Camera.INSTANCE.position.z += stepSize;
+			Camera.INSTANCE.position.z += STEP_SIZE;
 		}
 		
 		if (joystick.movingBackward()){
-			Camera.INSTANCE.position.x += stepSize;
+			Camera.INSTANCE.position.x += STEP_SIZE;
 		}
 		
 		if (joystick.movingRight()){
-			Camera.INSTANCE.position.z -= stepSize;
+			Camera.INSTANCE.position.z -= STEP_SIZE;
 		}
 		
 		Camera.INSTANCE.update();
